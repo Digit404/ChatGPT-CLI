@@ -1,6 +1,6 @@
-# version 0.6
+# version 0.7
 
-#TODO: indention? stream, combine with askgpt, back message count, history fucks up, UX
+#TODO: stream, combine with askgpt, back message count, UX
 
 import json
 import os
@@ -23,18 +23,6 @@ if not os.path.exists(CONVERSATIONS_DIR):
     os.makedirs(CONVERSATIONS_DIR)
 
 YES_OR_NO = f"{Fore.RESET}({Fore.GREEN}y{Fore.RESET}, {Fore.RED}n{Fore.RESET})"
-
-COMMANDS = {
-    "bye": "Exit the program and receive a goodbye message",
-    "exit": "Exit the program immediately",
-    "help": "Display this message again",
-    "save": f"Save the current conversation to a file\n\t{Fore.BLACK + Style.BRIGHT}USAGE: /save [filename]{Style.RESET_ALL}",
-    "load": f"Load a previous conversation\n\t{Fore.BLACK + Style.BRIGHT}USAGE: /load [filename] [-y]{Style.RESET_ALL}",
-    "hist": "View the history of the conversation",
-    "back": f"Go back in the conversation a certain number of times\n\t{Fore.BLACK + Style.BRIGHT}USAGE: /back [number]{Style.RESET_ALL}",
-    "retry": "Generate another response to your last message",
-    "reset": "Reset the conversation to its initial state",
-}
 
 class Command:
     commands = []
@@ -77,9 +65,11 @@ class Command:
         """
         command_name, *args = prompt.split(" ")
         command = cls.match_command(command_name)
+        args = args[:command.args_num]
         if command != None:
-            print(arg for arg in args[:command.args_num])
-            command.function(arg if arg != "" else None for arg in args[:command.args_num])
+            if command.args_num > 0:
+                command.function(*args)
+            else: command.function()
         else:
             print(f"{Fore.RED}Command unrecognized: {command_name}{Fore.RESET}")
 
@@ -232,7 +222,7 @@ class Message:
         Retry for a different response
         '''
         cls.messages.pop(-1)
-        return cls.send()
+        print(cls.send())
 
     @classmethod
     def export_json(cls, filename=None):
@@ -279,6 +269,10 @@ class Message:
             filename (str, optional): The filename of the conversation to load
             check (str, optional): Skips the checks
         '''
+        if check != None and filename == "-y":
+            filename = check
+            check = "-y"
+
         if check != "-y":
             if filename == "-y":
                 filename = None
@@ -334,6 +328,8 @@ class Message:
     def go_back(cls, num=None):
         if num == None:
             num = 1
+        else:
+            num = int(num)
         try:
             for _ in range(2*num):
                 cls.messages.pop(-1)
@@ -364,7 +360,7 @@ init()  # Initialize colorama for terminal text color support
 
 terminalWidth, _ = shutil.get_terminal_size()
 
-os.system("clear")
+os.system("cls")
 print("\033[1;1H", end="")
 
 print(fill(WELCOME_MESSAGE, width=terminalWidth, replace_whitespace=False))
