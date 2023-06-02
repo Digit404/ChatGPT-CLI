@@ -215,9 +215,10 @@ class Message:
         """
         content = message.content
         
-        # replace placeholders with colors listed in color map
-        for placeholder, color_code in cls.COLOR_MAP.items():
-            content = content.replace(placeholder, color_code)
+        # replace placeholders with colors listed in color map, but not for system messages
+        if message.role != "system":
+            for placeholder, color_code in cls.COLOR_MAP.items():
+                content = content.replace(placeholder, color_code)
 
         # get the terminal width
         terminalWidth, _ = shutil.get_terminal_size()
@@ -227,7 +228,7 @@ class Message:
         initial_indent = ""
         subsequent_indent = ""
         if history:
-            initial_indent = (f"{cls.AI_COLOR}GPT" if message.role == "assistant" else f"{Fore.BLUE}You") + ": "
+            initial_indent = (f"{cls.AI_COLOR}GPT" if message.role == "assistant" else f"{Fore.BLUE}You" if message.role == "user" else f"{Fore.RESET}Sys") + ": "
             subsequent_indent = "     "
 
         # Okay, so this line is a mess, it splits the lines in the input first because of a bug in ansiwrap,
@@ -355,15 +356,18 @@ class Message:
         print(f"{Fore.GREEN}Conversation loaded.")
     
     @classmethod
-    def history(cls):
+    def history(cls, all=None):
         '''
         Displays the history of the conversation
         '''
-        if any(message.role != "system" for message in Message.messages):
-            for message in Message.messages:
-                if message.role == "system": continue
-                print(cls.format_content(message, True), end="\n\n")
-        else:
+
+        num_messages = 0
+        
+        for message in Message.messages:
+            if message.role == "system" and all != "-a": continue
+            num_messages += 1
+            print(cls.format_content(message, True), end="\n\n")
+        if num_messages == 0:
             print(f"{Fore.RED}There are no messages in history{Fore.RESET}")
     
     @classmethod
@@ -391,7 +395,7 @@ Command(["exit", "e"], exit, "Exit the program immediately")
 Command(["help", "h"], Command.help, "Display this message again")
 Command(["save", "s"], Message.export_json, "Save the current conversation to a file", args_num=1, usage="[filename]")
 Command(["load", "l"], Message.import_json, "Load a previous conversation", args_num=2, usage="[filename] [-y]")
-Command(["hist", "list", "ls"], Message.history, "View the history of the conversation")
+Command(["hist", "list", "ls"], Message.history, "View the history of the conversation", args_num=1) # secret -a argument to view system messages
 Command(["back", "b"], Message.go_back, "Go back in the conversation a certain number of times", args_num=1, usage="[number]")
 Command(["retry", "r"], Message.retry, "Generate another response to your last message")
 Command(["reset"], Message.reset, "Reset the conversation to its initial state")
@@ -430,7 +434,7 @@ while True:
     # Get input
     prompt = input(Style.RESET_ALL + Fore.BLUE + "Chat " + ARROW)
 
-    if prompt and prompt[0] == "/":
+    if prompt and prompt[0] == "/" and prompt[1:]:
         Command.run(prompt[1:])
     else:
         print(Message.send(prompt))
