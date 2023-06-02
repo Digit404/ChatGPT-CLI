@@ -4,6 +4,7 @@
 
 import json
 import os
+import sys
 import shutil
 from ansiwrap import fill
 from colorama import Fore, Style, init
@@ -14,6 +15,11 @@ import openai
 MODEL = "gpt-3.5-turbo"
 TEMPERATURE = 0.6
 
+YES_OR_NO = f"{Fore.RESET}({Fore.GREEN}y{Fore.RESET}, {Fore.RED}n{Fore.RESET})"
+
+WELCOME_MESSAGE = f"Welcome to {Fore.GREEN}ChatGPT{Fore.RESET}, type {Fore.YELLOW}/exit{Fore.RESET} to exit, or type {Fore.YELLOW}/help{Fore.RESET} for a list of commands"
+ARROW = "> " + Fore.RESET
+
 # find the conversation folder based on the path of the script file
 CONVERSATIONS_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "conversations"
@@ -21,8 +27,6 @@ CONVERSATIONS_DIR = os.path.join(
 
 if not os.path.exists(CONVERSATIONS_DIR):
     os.makedirs(CONVERSATIONS_DIR)
-
-YES_OR_NO = f"{Fore.RESET}({Fore.GREEN}y{Fore.RESET}, {Fore.RED}n{Fore.RESET})"
 
 class Command:
     commands = []
@@ -72,11 +76,6 @@ class Command:
             else: command.function()
         else:
             print(f"{Fore.RED}Command unrecognized: {command_name}{Fore.RESET}")
-
-
-
-WELCOME_MESSAGE = f"Welcome to {Fore.GREEN}ChatGPT{Fore.RESET}, type {Fore.YELLOW}/exit{Fore.RESET} to exit, or type {Fore.YELLOW}/help{Fore.RESET} for a list of commands"
-ARROW = "> " + Fore.RESET
 
 class Message:
     """
@@ -153,6 +152,8 @@ class Message:
             # save just the message, return just the content
             Message(response.content, response.role)
 
+            print("            ", end="\r")
+
             return cls.format_content(response)  # Format it
 
         except openai.error.RateLimitError as e:
@@ -213,7 +214,7 @@ class Message:
             "You are communicating through the terminal. You can use {COLOR} to change the color of your text for emphasis or whatever you want. Colors available are RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET. You can also switch to BRIGHT colors using {BRIGHT}, and switch back using {RESET}",
             "system",
         )
-        if ~silent:
+        if not silent:
             print("Conversation reset")
 
     @classmethod
@@ -343,6 +344,7 @@ class Message:
         print(Message.send("Goodbye"))
         exit()
 
+# Set up the commands
 Command(["bye", "goodbye"], Message.goodbye, "Exit the program and receive a goodbye message")
 Command(["exit", "e"], exit, "Exit the program immediately")
 Command(["help", "h"], Command.help, "Display this message again")
@@ -360,10 +362,28 @@ init()  # Initialize colorama for terminal text color support
 
 terminalWidth, _ = shutil.get_terminal_size()
 
-os.system("cls")
+# AskGPT mode, include the question in the command and it will try to answer as briefly as it can
+if len(sys.argv) > 1:
+    args = sys.argv
+    if len(args) == 2:
+        prompt = args[1].strip('"').strip("'")
+    else:
+        prompt = " ".join(args)
+    Message(
+            "You will be asked one short question. You will be as brief as possible with your response, using incomplete sentences if necessary. You will respond with text only, no new lines or markdown elements. After you respond it will be the end of the conversation, do not say goodbye",
+            "system",
+        )
+    print(Message.send(prompt))
+    quit()
+
+# Reset the screen, not necessary
+os.system('cls' if os.name == 'nt' else 'clear')
 print("\033[1;1H", end="")
 
+# Welcome message
 print(fill(WELCOME_MESSAGE, width=terminalWidth, replace_whitespace=False))
+
+#LOOP
 
 while True:
     # Get input
