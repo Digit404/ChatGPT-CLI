@@ -3,6 +3,7 @@
 This project is a terminal-based interface for interacting with OpenAI's ChatGPT model. It allows users to have text-based conversations with the AI, ask questions, and receive responses.
 
 ## Features
+---
 
 - Simple and intuitive command-based interface
 - Colorful and formatted messages for easy readability
@@ -12,22 +13,31 @@ This project is a terminal-based interface for interacting with OpenAI's ChatGPT
 - AskGPT mode for brief answers to questions
 
 ## Installation
+---
 
-1. Clone the repository:
+1. Get an [Open AI API key](https://platform.openai.com/account/api-keys)
+
+2. Set API key as OPEN_API_KEY environment variable
+	```shell
+	export OPENAI_API_KEY='sk-...'
+	```
+
+3. Clone the repository:
 
    ```shell
    git clone https://github.com/Digit404/ChatGPT-CLI.git
    ```
 
-2. Install the required dependencies:
+4. Install the required dependencies:
 
    ```shell
    pip install -r requirements.txt
    ```
 
-3. Works best when added to PATH, so it can be used from anywhere!
+5. Works best when added to PATH, so it can be used from anywhere!
 
 ## Usage
+---
 
 1. Start the ChatGPT terminal interface:
 
@@ -42,6 +52,7 @@ This project is a terminal-based interface for interacting with OpenAI's ChatGPT
 	```
 
 ## Commands
+---
 
 The following commands are available within the terminal interface:
 
