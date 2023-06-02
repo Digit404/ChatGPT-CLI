@@ -15,7 +15,7 @@ This project is a terminal-based interface for interacting with OpenAI's ChatGPT
 
 1. Get an [Open AI API key](https://platform.openai.com/account/api-keys)
 
-2. Set API key as OPEN_API_KEY environment variable
+2. Set API key as OPENAI_API_KEY environment variable
 	```shell
 	export OPENAI_API_KEY='sk-...'
 	```
