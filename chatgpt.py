@@ -1,6 +1,6 @@
-# version 0.7
+# version 0.8
 
-#TODO: stream, combine with askgpt, back message count, UX
+#TODO: stream, UX
 
 import json
 import os
@@ -13,8 +13,9 @@ import openai
 
 # constants
 MODEL = "gpt-3.5-turbo"
-TEMPERATURE = 0.6
+# TEMPERATURE = 0.6 # currently unused
 
+# Simple prompt for yes or no, for insertion into increasingly long strings
 YES_OR_NO = f"{Fore.RESET}({Fore.GREEN}y{Fore.RESET}, {Fore.RED}n{Fore.RESET})"
 
 WELCOME_MESSAGE = f"Welcome to {Fore.GREEN}ChatGPT{Fore.RESET}, type {Fore.YELLOW}/exit{Fore.RESET} to exit, or type {Fore.YELLOW}/help{Fore.RESET} for a list of commands"
@@ -29,8 +30,26 @@ if not os.path.exists(CONVERSATIONS_DIR):
     os.makedirs(CONVERSATIONS_DIR)
 
 class Command:
+    """
+    Class to hold all commands for simplicity
+    """
+
     commands = []
+
     def __init__(self, keywords, function, message, args_num=0, usage=None):
+        """
+        Initializes a new Command object.
+
+        Args:
+            keywords (str or list): Keyword(s) associated with the command.
+            function (callable): The function to execute when the command is invoked.
+            message (str): A brief description of the command.
+            args_num (int, optional): The number of expected arguments. Defaults to 0.
+            usage (str, optional): Usage instructions for the command. Defaults to None.
+
+        Raises:
+            ValueError: If the keywords input is not a string or a list of strings.
+        """
         if isinstance(keywords, str):
             self.keywords = [keywords]
         elif isinstance(keywords, list) and all(isinstance(item, str) for item in keywords):
@@ -46,6 +65,9 @@ class Command:
 
     @classmethod
     def help(cls):
+        """
+        Displays the available commands and their descriptions.
+        """
         print("Available commands:")
         for command in Command.commands:
             print(f"{Fore.YELLOW}/{command.keywords[0]}", end="\t")
@@ -54,6 +76,15 @@ class Command:
                 print(f"\t{Fore.BLACK + Style.BRIGHT}USAGE: /{command.keywords[0]} {command.usage + Style.RESET_ALL}")
     @classmethod
     def match_command(cls, command_name):
+        """
+        Finds the command based on a keyword.
+
+        Args:
+            command_name (str): The keyword to search for.
+
+        Returns:
+            Command or None: The matched command if found, otherwise None.
+        """
         for command in cls.commands:
             if command_name in command.keywords:
                 return command
@@ -62,20 +93,30 @@ class Command:
     @classmethod
     def run(cls, prompt):
         """
-        Runs the command
+        Runs the command based on the provided prompt.
 
         Args:
-            command (str): The command
+            prompt (str): The command and its arguments.
         """
+        # Split the prompt into the command and its arguments
         command_name, *args = prompt.split(" ")
+
+        # Find the matching command based on the command name
         command = cls.match_command(command_name)
+
+        # Extract the required number of arguments
         args = args[:command.args_num]
-        if command != None:
+
+        if command is not None:
             if command.args_num > 0:
+                # Call the command's function with the provided arguments
                 command.function(*args)
-            else: command.function()
+            else:
+                # Call the command's function without any arguments
+                command.function()
         else:
             print(f"{Fore.RED}Command unrecognized: {command_name}{Fore.RESET}")
+            print("Type /help for a list of commands")
 
 class Message:
     """
