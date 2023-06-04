@@ -14,6 +14,9 @@ This project is a terminal-based interface for interacting with OpenAI's ChatGPT
 ## Installation
 
 1. Get an [Open AI API key](https://platform.openai.com/account/api-keys)
+	- Sign in to your OpenAI account on [OpenAI Platform](https://platform.openai.com/).
+	- Navigate to your account settings and select "API Keys".
+	- Create a new API key if you don't already have one.
 
 2. Set API key as OPENAI_API_KEY environment variable
 
@@ -77,3 +80,13 @@ The following commands are available within the terminal interface:
 - `/back [number]` or `/b [number]`: Go back in the conversation a certain number of times.
 - `/retry` or `/r`: Generate another response to your last message.
 - `/reset`: Reset the conversation to its initial state.
+
+## Troubleshooting
+
+If you encounter any issues during the installation or usage of the ChatGPT CLI, consider the following tips:
+
+- Make sure you have the required dependencies installed, as mentioned in the installation section.
+- Double-check that you have set the `OPENAI_API_KEY` environment variable correctly.
+- If you're experiencing any errors or unexpected behavior, try updating the OpenAI Python package to the latest version.
+
+If the problem persists, feel free to open an issue on the [GitHub repository](https://github.com/Digit404/ChatGPT-CLI/issues) for further assistance.
