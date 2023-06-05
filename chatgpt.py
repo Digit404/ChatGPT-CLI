@@ -1,6 +1,6 @@
 # version 0.8
 
-#TODO: stream, UX, handle token limit
+#TODO: stream, handle token limit, stop using input() handle input manually, handle API key
 
 import json
 import os
@@ -295,7 +295,6 @@ class Message:
                 filename = None
             else:
                 break
-        #...
         
         # make sure it ends in json
         filename += ".json" if filename[-5:] != ".json" else ""
@@ -426,7 +425,7 @@ if len(sys.argv) > 1:
     if len(args) == 2:
         prompt = args[1].strip('"').strip("'")
     else:
-        prompt = " ".join(args)
+        prompt = " ".join(args[1:])
     Message(
             "You will be asked one short question. You will be as brief as possible with your response, using incomplete sentences if necessary. You will respond with text only, no new lines or markdown elements. After you respond it will be the end of the conversation, do not say goodbye",
             "system",
