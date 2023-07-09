@@ -13,7 +13,7 @@ from datetime import datetime
 import openai
 
 # constants
-MODEL = "gpt-3.5-turbo"
+MODEL = "gpt-4"
 # TEMPERATURE = 0.6 # currently unused
 
 # Simple prompt for yes or no, for insertion into increasingly long strings
@@ -199,9 +199,7 @@ class Message:
 
             return cls.format_content(response)  # Format it
 
-        except openai.error.RateLimitError as e:
-            return f"{Fore.RED}RATE LIMIT EXCEEDED, PLEASE TRY AGAIN."
-        except openai.error as e:
+        except Exception as e:
             return f"{Fore.RED}ERROR: {e}"
 
     @classmethod
